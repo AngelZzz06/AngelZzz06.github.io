@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Asistencia - Estudiantes y Profesor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: url('images/nunuespacial.jpeg') no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 0;
+    }
+
+    .contenedor {
+      max-width: 600px;
+      margin: 50px auto;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
+      position: relative;
+      z-index: 1;
+      color: white;
+      text-shadow: 1px 1px 2px black;
+    }
+
+    h2 {
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    h2 span {
+      font-size: 1.4em;
+    }
+
+    .logo-fiei {
+      height: 90px;
+      border-radius: 5px;
+      margin-left: auto;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin: 10px 0 5px;
+      color: white;
+    }
+
+    input[type="password"], input[type="date"] {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      border: none;
+    }
+
+    button {
+      background-color: #2563eb;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      margin-top: 10px;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1d4ed8;
+    }
+
+    .error {
+      color: yellow;
+      font-weight: bold;
+    }
+
+    .oculto {
+      display: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      color: black;
+    }
+
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #e0e7ff;
+    }
+
+    .presente {
+      background-color: #34d399;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<div class="contenedor" id="inicio">
+  <h2>
+    <span>Bienvenido</span>
+    <img src="images/FIEI.jpg" class="logo-fiei" alt="Logo FIEI" />
+  </h2>
+  <label for="codigo">Código único:</label>
+  <input type="password" id="codigo" placeholder="Ingresa tu código" />
+  <button onclick="iniciarSesion()">Entrar</button>
+  <button onclick="mostrarPanelProfesor()">Soy Profesor</button>
+  <div class="error" id="errorLogin"></div>
+</div>
+
+<div class="contenedor oculto" id="panelAlumno">
+  <h2>
+    <span id="saludoAlumno"></span>
+    <img src="images/FIEI.jpg" class="logo-fiei" alt="Logo FIEI" />
+  </h2>
+  <label>Fecha de hoy:</label>
+  <input type="date" id="fecha" readonly />
+  <p>Marca tu asistencia:</p>
+  <button class="presente" onclick="guardarAsistencia('Presente')">✔ Presente</button>
+</div>
+
+<div class="contenedor oculto" id="loginProfesor">
+  <h2>
+    <span>Acceso Profesor</span>
+    <img src="images/FIEI.jpg" class="logo-fiei" alt="Logo FIEI" />
+  </h2>
+  <label for="claveProfesor">Clave:</label>
+  <input type="password" id="claveProfesor" placeholder="admin123" />
+  <button onclick="accederComoProfesor()">Entrar</button>
+  <div class="error" id="errorProfesor"></div>
+</div>
+
+<div class="contenedor oculto" id="panelProfesor">
+  <h2>
+    <span>Panel del Profesor</span>
+    <img src="images/FIEI.jpg" class="logo-fiei" alt="Logo FIEI" />
+  </h2>
+  <button onclick="exportarExcel()">📁 Exportar a Excel</button>
+  <div id="tablaAsistencia"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+  const alumnos = {
+    "2024020374": "Luis Angel Cotacallapa",
+    "2024034625": "Jesus Abel Huaricancha",
+  };
+
+  let codigoActual = "";
+    document.getElementById("fecha").value = fechaHoy;
+
+  function iniciarSesion() {
+    const codigo = document.getElementById("codigo").value.trim();
+    const error = document.getElementById("errorLogin");
+    error.textContent = "";
+
+    if (alumnos[codigo]) {
+      codigoActual = codigo;
+      document.getElementById("saludoAlumno").textContent = "Bienvenido, " + alumnos[codigo];
+      document.getElementById("inicio").classList.add("oculto");
+      document.getElementById("panelAlumno").classList.remove("oculto");
+    } else {
+      error.textContent = "Código incorrecto.";
+    }
+  }
+
+  function guardarAsistencia(estado) {
+    const datos = JSON.parse(localStorage.getItem("asistencia")) || {};
+    if (!datos[fechaHoy]) datos[fechaHoy] = {};
+    datos[fechaHoy][codigoActual] = estado;
+    localStorage.setItem("asistencia", JSON.stringify(datos));
+    alert("Asistencia registrada como: " + estado);
+    location.reload();
+  }
+
+  function mostrarPanelProfesor() {
+    document.getElementById("inicio").classList.add("oculto");
+    document.getElementById("loginProfesor").classList.remove("oculto");
+  }
+
+  function accederComoProfesor() {
+    const clave = document.getElementById("claveProfesor").value.trim();
+    const error = document.getElementById("errorProfesor");
+    error.textContent = "";
+    if (clave === "admin123") {
+      document.getElementById("loginProfesor").classList.add("oculto");
+      document.getElementById("panelProfesor").classList.remove("oculto");
+      mostrarTabla();
+    } else {
+      error.textContent = "Clave incorrecta.";
+    }
+  }
+
+  function mostrarTabla() {
+    const datos = JSON.parse(localStorage.getItem("asistencia")) || {};
+    const alumnosLista = Object.entries(alumnos);
+    let html = `<table><thead><tr><th>Fecha</th>`;
+    alumnosLista.forEach(([codigo, nombre]) => {
+      html += `<th>${nombre}</th>`;
+    });
+    html += `</tr></thead><tbody>`;
+
+    const fechas = Object.keys(datos).sort();
+    fechas.forEach(fecha => {
+      html += `<tr><td>${fecha}</td>`;
+      alumnosLista.forEach(([codigo]) => {
+        const estado = datos[fecha][codigo] || "-";
+        html += `<td>${estado}</td>`;
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody></table>`;
+    document.getElementById("tablaAsistencia").innerHTML = html;
+  }
+
+  function exportarExcel() {
+    const datos = JSON.parse(localStorage.getItem("asistencia")) || {};
+    const alumnosLista = Object.entries(alumnos);
+    const hoja = [["Fecha", ...alumnosLista.map(a => a[1])]];
+
+    Object.keys(datos).sort().forEach(fecha => {
+      const fila = [fecha];
+      alumnosLista.forEach(([codigo]) => {
+        fila.push(datos[fecha][codigo] || "-");
+      });
+      hoja.push(fila);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(hoja);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Asistencia");
+    XLSX.writeFile(wb, "asistencia.xlsx");
+  }
+</script>
+
+</body>
+</html>
