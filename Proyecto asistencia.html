@@ -9,7 +9,7 @@
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background: url('images/nunuespacial.jpeg') no-repeat center center fixed;
+      background: url('images/UNFV.jpg') no-repeat center center fixed;
       background-size: cover;
       position: relative;
     }
@@ -124,11 +124,19 @@
     <span>Bienvenido</span>
     <img src="images/FIEI.jpg" class="logo-fiei" alt="Logo FIEI" />
   </h2>
-  <label for="codigo">Código único:</label>
-  <input type="password" id="codigo" placeholder="Ingresa tu código" />
-  <button onclick="iniciarSesion()">Entrar</button>
-  <button onclick="mostrarPanelProfesor()">Soy Profesor</button>
-  <div class="error" id="errorLogin"></div>
+
+  <div style="display: flex; align-items: center; gap: 20px;">
+    <!-- Imagen QR a la izquierda -->
+    <img src="images/QR pagina.png" alt="Código QR" style="width: 100px; height: 100px; border-radius: 10px;" />
+    
+    <div style="flex: 1;">
+      <label for="codigo">Código único:</label>
+      <input type="password" id="codigo" placeholder="Ingresa tu código" />
+      <button onclick="iniciarSesion()">Entrar</button>
+      <button onclick="mostrarPanelProfesor()">Soy Profesor</button>
+      <div class="error" id="errorLogin"></div>
+    </div>
+  </div>
 </div>
 
 <div class="contenedor oculto" id="panelAlumno">
@@ -171,7 +179,10 @@
   };
 
   let codigoActual = "";
-    document.getElementById("fecha").value = fechaHoy;
+
+  // Obtener la fecha actual en formato YYYY-MM-DD
+  const fechaHoy = new Date().toISOString().split("T")[0];
+  document.getElementById("fecha").value = fechaHoy;
 
   function iniciarSesion() {
     const codigo = document.getElementById("codigo").value.trim();
